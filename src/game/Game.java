@@ -75,16 +75,18 @@ public class Game {
 			// Updating
 			loops = 0;
 
-			while (System.currentTimeMillis() > nextGameTick && loops < MAX_FRAMESKIPS) {
+			while (nextGameTick < System.currentTimeMillis() && loops < MAX_FRAMESKIPS) {
 				updateObjects();
-				ticks++;
 
-				nextGameTick += TIME_PER_TICK;
+				ticks++;
 				loops++;
+				nextGameTick += TIME_PER_TICK;
 			}
 
 			// Rendering
-
+			interpolation = (float) (System.currentTimeMillis() + TIME_PER_TICK - nextGameTick) /
+				(float) TIME_PER_TICK;
+			renderObjects(interpolation);
 			// FPS Check
 		}
 
