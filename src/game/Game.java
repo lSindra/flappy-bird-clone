@@ -73,6 +73,15 @@ public class Game {
 
 		while (running) {
 			// Updating
+			loops = 0;
+
+			while (System.currentTimeMillis() > nextGameTick && loops < MAX_FRAMESKIPS) {
+				updateObjects();
+				ticks++;
+
+				nextGameTick += TIME_PER_TICK;
+				loops++;
+			}
 
 			// Rendering
 
