@@ -1,7 +1,6 @@
 package game;
 
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
@@ -22,6 +21,14 @@ public class Game {
 	private ArrayList<Updatable> updatableObjects = new ArrayList<>();
 	private ArrayList<Renderable> renderablesObjects = new ArrayList<>();
 
+	private long nextGameTick;
+	private int ticks;
+	private long timeAtLastFPSCheck;
+	private boolean gameRunning;
+	final int TICKS_PER_SECOND = 60;
+	final int TIME_PER_TICK = 1000 / TICKS_PER_SECOND;
+	final int MAX_FRAMESKIPS = 5;
+
 	public void addUpdatable(Updatable updatable) {
 		updatableObjects.add(updatable);
 	}
@@ -38,19 +45,7 @@ public class Game {
 		renderablesObjects.remove(renderable);
 	}
 
-	public static void main(String[] args) {
-		Game game = new Game();
-		game.renderablesObjects.add(new Renderable() {
-			@Override
-			public void render(Graphics2D graphics, float interpolation) {
-				graphics.setColor(Color.RED);
-				graphics.drawRect(300, 250, 50, 100);
-			}
-		});
-		game.start();
-	}
-
-	private void start() {
+	public void start() {
 		// Init window
 		initWindow();
 
@@ -58,46 +53,59 @@ public class Game {
 		input = new Input();
 
 		// Init game loop
-		final int TICKS_PER_SECOND = 60;
-		final int TIME_PER_TICK = 1000 / TICKS_PER_SECOND;
-		final int MAX_FRAMESKIPS = 5;
-
-		long nextGameTick = System.currentTimeMillis();
+		nextGameTick = getCurrentTime();
 		int loops;
 		float interpolation;
 
-		long timeAtLastFPSCheck = 0;
-		int ticks = 0;
+		timeAtLastFPSCheck = 0;
+		ticks = 0;
 
-		boolean running = true;
+		gameRunning = true;
 
-		while (running) {
-			// Updating
-			loops = 0;
+		gameLoop();
+	}
 
-			while (nextGameTick < System.currentTimeMillis() && loops < MAX_FRAMESKIPS) {
-				updateObjects();
+	private void gameLoop() {
+		while (gameRunning) {
+			update();
 
-				ticks++;
-				loops++;
-				nextGameTick += TIME_PER_TICK;
-			}
+			render();
 
-			// Rendering
-			interpolation = (float) (System.currentTimeMillis() + TIME_PER_TICK - nextGameTick) /
-				(float) TIME_PER_TICK;
-			renderObjects(interpolation);
-
-			// FPS Check
-			if (System.currentTimeMillis() - timeAtLastFPSCheck >= 1000) {
-				System.out.println("FPS: " + ticks);
-				gameWindow.setTitle(gameName + " - FPS: " + ticks);
-				ticks = 0;
-				timeAtLastFPSCheck = System.currentTimeMillis();
-			}
+			checkFPS();
 		}
+	}
 
-		// Game end
+	private void checkFPS() {
+		if (getCurrentTime() - timeAtLastFPSCheck >= 1000) {
+			System.out.println("FPS: " + ticks);
+			gameWindow.setTitle(gameName + " - FPS: " + ticks);
+			ticks = 0;
+			timeAtLastFPSCheck = getCurrentTime();
+		}
+	}
+
+	private void render() {
+		float interpolation;
+		interpolation =
+			(float) (getCurrentTime() + TIME_PER_TICK - nextGameTick) / (float) TIME_PER_TICK;
+		renderObjects(interpolation);
+	}
+
+	private void update() {
+		int loops;
+		loops = 0;
+
+		while (nextGameTick < getCurrentTime() && loops < MAX_FRAMESKIPS) {
+			updateObjects();
+
+			ticks++;
+			loops++;
+			nextGameTick += TIME_PER_TICK;
+		}
+	}
+
+	private long getCurrentTime() {
+		return System.currentTimeMillis();
 	}
 
 	private void initWindow() {
@@ -125,14 +133,9 @@ public class Game {
 	}
 
 	private void renderObjects(float interpolation) {
-		BufferStrategy bufferStrategy = game.getBufferStrategy();
-		if (bufferStrategy == null) {
-			game.createBufferStrategy(2);
-			return;
-		}
+		BufferStrategy bufferStrategy = getOrCreateBufferStrategy();
 
-		Graphics2D graphics = (Graphics2D) bufferStrategy.getDrawGraphics();
-		graphics.clearRect(0, 0, game.getWidth(), game.getHeight());
+		Graphics2D graphics = getGraphics(bufferStrategy);
 
 		for (Renderable renderable : renderablesObjects) {
 			renderable.render(graphics, interpolation);
@@ -140,5 +143,19 @@ public class Game {
 
 		graphics.dispose();
 		bufferStrategy.show();
+	}
+
+	private Graphics2D getGraphics(BufferStrategy bufferStrategy) {
+		Graphics2D graphics = (Graphics2D) bufferStrategy.getDrawGraphics();
+		graphics.clearRect(0, 0, game.getWidth(), game.getHeight());
+		return graphics;
+	}
+
+	private BufferStrategy getOrCreateBufferStrategy() {
+		BufferStrategy bufferStrategy = game.getBufferStrategy();
+		if (bufferStrategy == null) {
+			game.createBufferStrategy(2);
+		}
+		return bufferStrategy;
 	}
 }
