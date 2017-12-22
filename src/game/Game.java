@@ -14,8 +14,8 @@ public class Game {
 	public final static int HEIGHT = 600;
 
 	private String gameName = "Flappy Bird";
-
 	private Canvas game = new Canvas();
+	private JFrame gameWindow;
 
 	private Input input;
 
@@ -50,7 +50,7 @@ public class Game {
 		game.start();
 	}
 
-	public void start() {
+	private void start() {
 		// Init window
 		initWindow();
 
@@ -87,7 +87,14 @@ public class Game {
 			interpolation = (float) (System.currentTimeMillis() + TIME_PER_TICK - nextGameTick) /
 				(float) TIME_PER_TICK;
 			renderObjects(interpolation);
+
 			// FPS Check
+			if (System.currentTimeMillis() - timeAtLastFPSCheck >= 1000) {
+				System.out.println("FPS: " + ticks);
+				gameWindow.setTitle(gameName + " - FPS: " + ticks);
+				ticks = 0;
+				timeAtLastFPSCheck = System.currentTimeMillis();
+			}
 		}
 
 		// Game end
@@ -95,7 +102,7 @@ public class Game {
 
 	private void initWindow() {
 		Dimension gameSize = new Dimension(Game.WIDTH, Game.HEIGHT);
-		JFrame gameWindow = new JFrame(gameName);
+		gameWindow = new JFrame(gameName);
 
 		gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gameWindow.setSize(gameSize);
