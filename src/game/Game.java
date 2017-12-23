@@ -1,5 +1,9 @@
 package game;
 
+import game.content.Renderable;
+import game.content.Updatable;
+import game.content.entities.Bird;
+import game.content.entities.Pipes;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -25,7 +29,7 @@ public class Game {
 	private int ticks;
 	private long timeAtLastFPSCheck;
 	private boolean gameRunning;
-	final int TICKS_PER_SECOND = 60;
+	final int TICKS_PER_SECOND = 10;
 	final int TIME_PER_TICK = 1000 / TICKS_PER_SECOND;
 	final int MAX_FRAMESKIPS = 5;
 
@@ -52,11 +56,13 @@ public class Game {
 		// Init input
 		input = new Input();
 
+		Pipes pipes = new Pipes();
+		pipes.setPipes();
+		updatableObjects.add(pipes);
+		renderablesObjects.add(pipes);
+
 		// Init game loop
 		nextGameTick = getCurrentTime();
-		int loops;
-		float interpolation;
-
 		timeAtLastFPSCheck = 0;
 		ticks = 0;
 
@@ -86,8 +92,9 @@ public class Game {
 
 	private void render() {
 		float interpolation;
-		interpolation =
-			(float) (getCurrentTime() + TIME_PER_TICK - nextGameTick) / (float) TIME_PER_TICK;
+		float deltaFromNextGameTick = (float) (getCurrentTime() + TIME_PER_TICK - nextGameTick);
+
+		interpolation = deltaFromNextGameTick / (float) TIME_PER_TICK;
 		renderObjects(interpolation);
 	}
 
@@ -155,6 +162,7 @@ public class Game {
 		BufferStrategy bufferStrategy = game.getBufferStrategy();
 		if (bufferStrategy == null) {
 			game.createBufferStrategy(2);
+			return game.getBufferStrategy();
 		}
 		return bufferStrategy;
 	}
