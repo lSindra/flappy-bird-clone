@@ -20,8 +20,8 @@ public class Pipes implements Updatable, Renderable {
 	private static final int SECOND_PIPE = 1;
 	private static final int THIRD_PIPE = 2;
 
-	private static final int X_COORD = 0;
-	private static final int Y_COORD = 1;
+	public static final int X_COORD = 0;
+	public static final int Y_COORD = 1;
 
 	private float xVelocity = -5.0f;
 
