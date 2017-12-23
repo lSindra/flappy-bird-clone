@@ -31,7 +31,7 @@ public class Pipes implements Updatable, Renderable {
 
 	private Random random;
 
-	public void setPipes() {
+	public Pipes() {
 		random = new Random();
 
 		resetPipes();

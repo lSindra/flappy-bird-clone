@@ -29,7 +29,7 @@ public class Game {
 	private int ticks;
 	private long timeAtLastFPSCheck;
 	private boolean gameRunning;
-	final int TICKS_PER_SECOND = 10;
+	final int TICKS_PER_SECOND = 60;
 	final int TIME_PER_TICK = 1000 / TICKS_PER_SECOND;
 	final int MAX_FRAMESKIPS = 5;
 
@@ -42,7 +42,7 @@ public class Game {
 	}
 
 	public void addRenderable(Renderable renderable) {
-		renderablesObjects.remove(renderable);
+		renderablesObjects.add(renderable);
 	}
 
 	public void removeRenderable(Renderable renderable) {
@@ -55,11 +55,6 @@ public class Game {
 
 		// Init input
 		input = new Input();
-
-		Pipes pipes = new Pipes();
-		pipes.setPipes();
-		updatableObjects.add(pipes);
-		renderablesObjects.add(pipes);
 
 		// Init game loop
 		nextGameTick = getCurrentTime();
