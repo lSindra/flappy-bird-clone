@@ -2,8 +2,6 @@ package game;
 
 import game.content.Renderable;
 import game.content.Updatable;
-import game.content.entities.Bird;
-import game.content.entities.Pipes;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -55,6 +53,7 @@ public class Game {
 
 		// Init input
 		input = new Input();
+		game.addKeyListener(input);
 
 		// Init game loop
 		nextGameTick = getCurrentTime();
